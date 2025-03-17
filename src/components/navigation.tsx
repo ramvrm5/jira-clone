@@ -1,4 +1,5 @@
-import { SettingsIcon, UsersIcon } from "lucide-react";
+"use client";
+
 import Link from "next/link";
 import {
   GoCheckCircle,
@@ -6,6 +7,10 @@ import {
   GoHome,
   GoHomeFill,
 } from "react-icons/go";
+import { usePathname } from "next/navigation";
+import { SettingsIcon, UsersIcon } from "lucide-react";
+
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 import { cn } from "@/lib/utils";
 
