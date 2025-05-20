@@ -12,7 +12,7 @@ type RequestType = InferRequestType<
   (typeof client.api.workspaces)[":workspaceId"]["join"]["$post"]
 >;
 
-export const useResetInviteCode = () => {
+export const useJoinWorkspace = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
