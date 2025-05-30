@@ -5,7 +5,7 @@ import { zValidator } from "@hono/zod-validator";
 
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASK_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 import { createAdminClient } from "@/lib/appwrite";
 import { getMember } from "@/features/members/utils";
 
@@ -21,7 +21,7 @@ const app = new Hono()
 
     const task = await databases.getDocument<Task>(
       DATABASE_ID,
-      TASK_ID,
+      TASKS_ID,
       taskId
     );
 
@@ -35,7 +35,7 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    await databases.deleteDocument(DATABASE_ID, TASK_ID, taskId);
+    await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
 
     return c.json({ data: { $id: task.$id } });
   })
@@ -103,7 +103,7 @@ const app = new Hono()
 
       const tasks = await databases.listDocuments<Task>(
         DATABASE_ID,
-        TASK_ID,
+        TASKS_ID,
         query
       );
 
@@ -179,7 +179,7 @@ const app = new Hono()
 
       const highestPositionTask = await databases.listDocuments(
         DATABASE_ID,
-        TASK_ID,
+        TASKS_ID,
         [
           Query.equal("status", status),
           Query.equal("workspaceId", workspaceId),
@@ -195,7 +195,7 @@ const app = new Hono()
 
       const task = await databases.createDocument(
         DATABASE_ID,
-        TASK_ID,
+        TASKS_ID,
         ID.unique(),
         {
           name,
@@ -223,7 +223,7 @@ const app = new Hono()
 
       const existingTask = await databases.getDocument<Task>(
         DATABASE_ID,
-        TASK_ID,
+        TASKS_ID,
         taskId
       );
 
@@ -239,7 +239,7 @@ const app = new Hono()
 
       const task = await databases.updateDocument(
         DATABASE_ID,
-        TASK_ID,
+        TASKS_ID,
         taskId,
         {
           name,
@@ -261,7 +261,7 @@ const app = new Hono()
 
     const task = await databases.getDocument<Task>(
       DATABASE_ID,
-      TASK_ID,
+      TASKS_ID,
       taskId
     );
 
@@ -302,6 +302,70 @@ const app = new Hono()
         assignee,
       },
     });
-  });
+  })
+  .post(
+    "/bulk-update",
+    sessionMiddleware,
+    zValidator(
+      "json",
+      z.object({
+        tasks: z.array(
+          z.object({
+            $id: z.string(),
+            status: z.nativeEnum(TaskStatus),
+            position: z.number().int().positive().min(1000).max(1_000_000),
+          })
+        ),
+      })
+    ),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { tasks } = await c.req.valid("json");
+
+      const tasksToUpdate = await databases.listDocuments<Task>(
+        DATABASE_ID,
+        TASKS_ID,
+        [
+          Query.contains(
+            "$id",
+            tasks.map((task) => task.$id)
+          ),
+        ]
+      );
+
+      const workspaceIds = new Set(
+        tasksToUpdate.documents.map((task) => task.workspaceId)
+      );
+
+      if (workspaceIds.size !== 1) {
+        return c.json({ error: "All tasks must belong to the same workspace" });
+      }
+
+      const workspaceId = workspaceIds.values().next().value;
+
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "unauthorized" }, 401);
+      }
+
+      const updatedTasks = await Promise.all(
+        tasks.map(async (task) => {
+          const { $id, status, position } = task;
+          return databases.updateDocument<Task>(DATABASE_ID, TASKS_ID, $id, {
+            status,
+            position,
+          });
+        })
+      );
+
+      return c.json({ data: updatedTasks });
+    }
+  );
 
 export default app;
