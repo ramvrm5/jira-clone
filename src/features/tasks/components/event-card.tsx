@@ -5,10 +5,11 @@ import { MemberAvatar } from "@/features/members/components/member-avatar";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useRouter } from "next/navigation";
+import { Member } from "@/features/members/types";
 
 interface EventCardProps {
   title: string;
-  assignee: any;
+  assignee: Member;
   project: Project;
   status: TaskStatus;
   id: string;
@@ -32,7 +33,7 @@ export const EventCard = ({
   const workspaceId = useWorkspaceId();
   const router = useRouter();
 
-  const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const onClick = () => {
     router.push(`/workspaces/${workspaceId}/tasks/${id}`);
   };
 

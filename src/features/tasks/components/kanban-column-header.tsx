@@ -1,7 +1,6 @@
 import {
   CircleCheckIcon,
   CircleDashedIcon,
-  CircleDotDashedIcon,
   CircleDotIcon,
   CircleIcon,
   PlusIcon,

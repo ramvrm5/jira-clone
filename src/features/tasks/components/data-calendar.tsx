@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  Calendar1Icon,
-  CalendarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   format,
   getDay,

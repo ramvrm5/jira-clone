@@ -1,5 +1,3 @@
-import { DottedSeparator } from "@/components/dotted-separator";
-
 interface OverviewPropertyProps {
   label: string;
   children: React.ReactNode;
