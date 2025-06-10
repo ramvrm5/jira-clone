@@ -22,7 +22,26 @@ import { getMember } from "@/features/members/utils";
 import { Workspace } from "../types";
 import { TaskStatus } from "@/features/tasks/types";
 
-const app = new Hono()
+const app = new Hono();
+
+/* ✅ Apply CORS Middleware */
+app.use(
+  "*",
+  cors({
+    origin: [
+      "https://jira-clone-4hig3kkkj-ramvrm5s-projects.vercel.app", // your frontend
+      "http://localhost:3000", // during local dev (optional)
+    ],
+    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // if you use cookies or session
+  })
+);
+
+/* ✅ Optional: Handle Preflight OPTIONS requests */
+app.options("*", (c) => c.text("OK", 204));
+
+app
   .get("/", sessionMiddleware, async (c) => {
     const user = c.get("user");
     const databases = c.get("databases");
@@ -445,17 +464,5 @@ const app = new Hono()
       },
     });
   });
-
-app.use(
-  "*",
-  cors({
-    origin: [
-      "https://jira-clone-4hig3kkkj-ramvrm5s-projects.vercel.app", // ⬅️ frontend
-    ],
-    allowMethods: ["GET", "POST", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // only if you rely on cookies / sessions
-  })
-);
 
 export default app;
