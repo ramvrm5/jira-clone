@@ -42,7 +42,16 @@ const app = new Hono()
       [Query.orderDesc("$createdAt"), Query.contains("$id", workspaceIds)]
     );
 
-    return c.json({ data: workspaces });
+    return c.json(
+      { data: workspaces },
+      {
+        headers: {
+          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        },
+      }
+    );
   })
   .get("/:workspaceId", sessionMiddleware, async (c) => {
     const user = c.get("user");
@@ -65,7 +74,16 @@ const app = new Hono()
       workspaceId
     );
 
-    return c.json({ data: workspace });
+    return c.json(
+      { data: workspace },
+      {
+        headers: {
+          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        },
+      }
+    );
   })
   .get("/:workspaceId/info", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -133,7 +151,16 @@ const app = new Hono()
         role: MemberRole.ADMIN,
       });
 
-      return c.json({ data: workspace });
+      return c.json(
+        { data: workspace },
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*", // or restrict to specific domain
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          },
+        }
+      );
     }
   )
   .patch(
