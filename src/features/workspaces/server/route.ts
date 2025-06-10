@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
@@ -42,16 +43,7 @@ const app = new Hono()
       [Query.orderDesc("$createdAt"), Query.contains("$id", workspaceIds)]
     );
 
-    return c.json(
-      { data: workspaces },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        },
-      }
-    );
+    return c.json({ data: workspaces });
   })
   .get("/:workspaceId", sessionMiddleware, async (c) => {
     const user = c.get("user");
@@ -74,16 +66,7 @@ const app = new Hono()
       workspaceId
     );
 
-    return c.json(
-      { data: workspace },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        },
-      }
-    );
+    return c.json({ data: workspace });
   })
   .get("/:workspaceId/info", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -151,16 +134,7 @@ const app = new Hono()
         role: MemberRole.ADMIN,
       });
 
-      return c.json(
-        { data: workspace },
-        {
-          headers: {
-            "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-          },
-        }
-      );
+      return c.json({ data: workspace });
     }
   )
   .patch(
@@ -471,5 +445,17 @@ const app = new Hono()
       },
     });
   });
+
+app.use(
+  "*",
+  cors({
+    origin: [
+      "https://jira-clone-4hig3kkkj-ramvrm5s-projects.vercel.app", // ⬅️ frontend
+    ],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // only if you rely on cookies / sessions
+  })
+);
 
 export default app;

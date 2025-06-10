@@ -13,16 +13,7 @@ const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
     const user = c.get("user");
 
-    return c.json(
-      { data: user },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        },
-      }
-    );
+    return c.json({ data: user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
     const { email, password } = c.req.valid("json");
@@ -39,16 +30,7 @@ const app = new Hono()
       maxAge: 60 * 60 * 24 * 30,
     });
 
-    return c.json(
-      { success: true },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        },
-      }
-    );
+    return c.json({ success: true });
   })
   .post("/register", zValidator("json", registerSchema), async (c) => {
     const { name, email, password } = c.req.valid("json");
@@ -66,16 +48,7 @@ const app = new Hono()
       maxAge: 60 * 60 * 24 * 30,
     });
 
-    return c.json(
-      { success: true },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        },
-      }
-    );
+    return c.json({ success: true });
   })
   .post("/logout", sessionMiddleware, async (c) => {
     const account = c.get("account");
@@ -83,16 +56,7 @@ const app = new Hono()
     deleteCookie(c, AUTH_COOKIE);
     await account.deleteSession("current");
 
-    return c.json(
-      { success: true },
-      {
-        headers: {
-          "Access-Control-Allow-Origin": "*", // or restrict to specific domain
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        },
-      }
-    );
+    return c.json({ success: true });
   });
 
 export default app;
