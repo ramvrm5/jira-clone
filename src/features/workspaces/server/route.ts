@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
@@ -22,26 +21,7 @@ import { getMember } from "@/features/members/utils";
 import { Workspace } from "../types";
 import { TaskStatus } from "@/features/tasks/types";
 
-const app = new Hono();
-
-/* ✅ Apply CORS Middleware */
-app.use(
-  "*",
-  cors({
-    origin: [
-      "https://jira-clone-4hig3kkkj-ramvrm5s-projects.vercel.app", // your frontend
-      "http://localhost:3000", // during local dev (optional)
-    ],
-    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // if you use cookies or session
-  })
-);
-
-/* ✅ Optional: Handle Preflight OPTIONS requests */
-app.options("*", (c) => c.text("OK", 204));
-
-app
+const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
     const user = c.get("user");
     const databases = c.get("databases");
